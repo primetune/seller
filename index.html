@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Payment Gateway</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+  <h1>Buy Product</h1>
+  <button id="payBtn">Pay ₹100</button>
+
+  <script>
+    document.getElementById('payBtn').onclick = async function () {
+      const res = await fetch('/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: 100 })
+      });
+
+      const data = await res.json();
+      if (!data.success) return alert('Order failed');
+
+      const options = {
+        key: 'RAZORPAY_KEY_ID', // এখানেই তোমার লাইভ/টেস্ট key বসাবে
+        amount: data.order.amount,
+        currency: 'INR',
+        name: 'Your Cafe',
+        description: 'Order Payment',
+        order_id: data.order.id,
+        handler: function (response) {
+          alert('✅ Payment Successful! ID: ' + response.razorpay_payment_id);
+        },
+        theme: { color: '#d4793c' }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
+    }
+  </script>
+</body>
+</html>
